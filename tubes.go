@@ -2,86 +2,89 @@ package main
 
 import "fmt"
 
+const NMAX int = 1000
+
+var i int
+
 type team struct {
 	namatim, bestplayer string
-	menang, selisihsk   int
+	menang, selisihSkor int
 }
 
-var i, it int
-var tim [1000]team
-var jumlaht int
+type Team [NMAX]team
 
 func main() {
-	menu()
+	var data Team
+	var jumlahdata int
+	menu(&data, &jumlahdata)
 }
 
-func menu() {
-	var pilih, selisihsk, menang int
+func menu(data *Team, jumlahdata *int) {
+	var pilih, selisihSkor, menang int
 	var namatim, bestplayer string
+	var hasil *team
 
 	for {
 		fmt.Println("-------------------------------------------------------------------------------")
 		fmt.Println("        Selamat Datang ke Aplikasi Pengelolaan Data E-Sports Tournament\n      ")
 		fmt.Println("-------------------------------------------------------------------------------")
-		fmt.Println("1. Input Tim <>")
-		fmt.Println("2. Update Tim <>")
-		fmt.Println("3. Delete Tim <>")
+		fmt.Println("1. Input data <>")
+		fmt.Println("2. Update data <>")
+		fmt.Println("3. Delete data <>")
 		fmt.Println("4. Tampilan Klasemen Menurut Kemenangan (Selection Sort) <>")
 		fmt.Println("5. Tampilan Klasemen Menurut Skor (Insertion Sort) <>")
-		fmt.Println("6. Search Nama Tim (Sequential Search) <>")
-		fmt.Println("7. Search Nama Tim (Binary Search) <>")
+		fmt.Println("6. Search Nama Team (Sequential Search) <>")
+		fmt.Println("7. Search Nama Team (Binary Search) <>")
 		fmt.Println("8. Keluar Aplikasi !! <>")
 		fmt.Println("Silahkan Pilih Menu yang ingin anda akses :)")
 		fmt.Scan(&pilih)
 
 		switch pilih {
 		case 1:
-			fmt.Print("Input Nama Tim :")
+			fmt.Print("Input Nama data :")
 			fmt.Scan(&namatim)
-			input(namatim)
+			InputTeam(data, jumlahdata, namatim)
 
 		case 2:
-			fmt.Print("Nama tim yang ingin diupdate :")
+			fmt.Print("Nama data yang ingin diupdate :")
 			fmt.Scan(&namatim)
 			fmt.Print("Input Kemenangan :")
 			fmt.Scan(&menang)
 			fmt.Print("Input Best Player :")
 			fmt.Scan(&bestplayer)
-			fmt.Print("Input Selisih Skor :")
-			fmt.Scan(&selisihsk)
-			update(namatim, menang, selisihsk, bestplayer)
+			UpdateTeam(data, *jumlahdata, namatim, menang, selisihSkor, bestplayer)
 
 		case 3:
-			fmt.Print("Nama tim yang ingin di delete :")
+			fmt.Print("Nama data yang ingin di delete :")
 			fmt.Scan(&namatim)
-			deletetim(namatim)
+			DeleteTeam(data, jumlahdata, namatim)
 
 		case 4:
-			sortmenang()
-			tampilkan()
+			SelectionSortBerdasarkanMenang(data, *jumlahdata)
+			MenampilkanData(data, *jumlahdata)
 
 		case 5:
-			sortskor()
-			tampilkan()
+			InsertionSortBerdasarkanSkor(data, *jumlahdata)
+			MenampilkanData(data, *jumlahdata)
 
 		case 6:
-			fmt.Print("Input Nama tim : ")
+			fmt.Print("Input Nama data : ")
 			fmt.Scan(&namatim)
-			ti := seqsearch(namatim)
-			if ti != nil {
-				fmt.Printf(" TIM : %s \n Menang :  %d \n Selisih Skor : %d \n Best Player : %s\n", ti.namatim, ti.menang, ti.selisihsk, ti.bestplayer)
+			hasil = SequentialSearch(data, *jumlahdata, namatim)
+			if hasil != nil {
+				fmt.Printf(" data : %s \n Menang :  %d \n Selisih Skor : %d \n Best Player : %s\n", hasil.namatim, hasil.menang, hasil.selisihSkor, hasil.bestplayer)
 			} else {
-				fmt.Println("Tim tidak ada")
+				fmt.Println("data tidak ada")
 			}
 
 		case 7:
-			fmt.Print("Input Nama tim : ")
+			fmt.Print("Input Nama data : ")
 			fmt.Scan(&namatim)
-			ti := binsearch(namatim)
-			if ti != nil {
-				fmt.Printf(" TIM : %s \n Menang :  %d \n Selisih Skor : %d \n Best Player : %s\n", ti.namatim, ti.menang, ti.selisihsk, ti.bestplayer)
+			hasil = BinarySearch(data, *jumlahdata, namatim)
+			if hasil != nil {
+				fmt.Printf(" data : %s \n Menang :  %d \n Selisih Skor : %d \n Best Player : %s\n", hasil.namatim, hasil.menang, hasil.selisihSkor, hasil.bestplayer)
 			} else {
-				fmt.Println("Tim tidak ada")
+				fmt.Println("data tidak ada")
 			}
 
 		case 8:
@@ -93,103 +96,121 @@ func menu() {
 	}
 }
 
-func input(namatim string) {
-	tim[jumlaht] = team{namatim: namatim}
-	jumlaht = jumlaht + 1
+func InputTeam(data *Team, jumlah *int, nama string) {
+	data[*jumlah].namatim = nama
+	*jumlah++
 }
 
-func update(namatim string, menang, selisihsk int, bestplayer string) {
-	for i = 0; i < jumlaht; i++ {
-		if tim[i].namatim == namatim {
-			tim[i].menang = menang
-			tim[i].selisihsk = selisihsk
-			tim[i].bestplayer = bestplayer
+func UpdateTeam(data *Team, jumlah int, nama string, menang int, skor int, player string) {
+	for i = 0; i < jumlah; i++ {
+		if data[i].namatim == nama {
+			data[i].menang = menang
+			data[i].selisihSkor = menang * 3
+			data[i].bestplayer = player
 			return
 		}
 	}
 }
 
-func deletetim(namatim string) {
-	for i = 0; i < jumlaht; i++ {
-		if tim[i].namatim == namatim {
-			for it = i; it < jumlaht-1; it++ {
-				tim[it] = tim[it+1]
-			}
-			jumlaht = jumlaht - 1
-			return
-		}
-	}
-}
-
-func seqsearch(namatim string) *team {
-	for i = 0; i < jumlaht; i++ {
-		if tim[i].namatim == namatim {
-			return &tim[i]
-		}
-	}
-	return nil
-}
-
-func binsearch(namatim string) *team {
-	var l, m, h int
-	for i = 0; i < jumlaht-1; i++ {
-		for it = 0; it < jumlaht-i-1; it++ {
-			if tim[it].namatim > tim[it+1].namatim {
-				temp := tim[it]
-				tim[it] = tim[it+1]
-				tim[it+1] = temp
-
-			}
-		}
-	}
-	l = 0
-	h = jumlaht - 1
-
-	for l <= h {
-		m = (l + h) / 2
-		if tim[m].namatim == namatim {
-			return &tim[m]
-		} else if tim[m].namatim < namatim {
-			l = m + 1
-		} else {
-			h = m - 1
-		}
-	}
-	return nil
-}
-
-func sortmenang() {
-	var maxIdx, j int
-	for i = 0; i < jumlaht-1; i++ {
-		maxIdx = i
-		for j = i + 1; j < jumlaht; j++ {
-			if tim[j].menang > tim[maxIdx].menang {
-				maxIdx = j
-			}
-		}
-		tim[i], tim[maxIdx] = tim[maxIdx], tim[i]
-	}
-}
-
-func sortskor() {
+func DeleteTeam(data *Team, jumlah *int, nama string) {
 	var j int
-	for i = 1; i < jumlaht; i++ {
-		key := tim[i]
-		j = i - 1
-		for j >= 0 && tim[j].selisihsk < key.selisihsk {
-			tim[j+1] = tim[j]
-			j = j - 1
+	for i = 0; i < *jumlah; i++ {
+		if data[i].namatim == nama {
+			for j = i; j < *jumlah-1; j++ {
+				data[j] = data[j+1]
+			}
+			*jumlah--
+			break
 		}
-		tim[j+1] = key
 	}
 }
 
-func tampilkan() {
+func SequentialSearch(data *Team, jumlah int, nama string) *team {
+	var found bool = false
+	var i int
+	i = 0
+	for i < jumlah && !found {
+		if data[i].namatim == nama {
+			found = true
+		} else {
+			i++
+		}
+	}
+	if found {
+		return &data[i]
+	} else {
+		return nil
+	}
+}
+
+func BinarySearch(data *Team, jumlah int, nama string) *team {
+	var j, kr, kn, med int
+	var found bool = false
+	var temp team
+
+	kr = 0
+	kn = jumlah - 1
+
+	for i = 0; i < jumlah-1; i++ {
+		for j = 0; j < jumlah-i-1; j++ {
+			if data[j].namatim > data[j+1].namatim {
+				temp = data[j]
+				data[j] = data[j+1]
+				data[j+1] = temp
+
+			}
+		}
+	}
+
+	for kr <= kn && !found {
+		med = (kr + kn) / 2
+		if data[med].namatim == nama {
+			return &data[med]
+		} else if data[med].namatim < nama {
+			kr = med + 1
+		} else {
+			kn = med - 1
+		}
+	}
+	return nil
+}
+
+func SelectionSortBerdasarkanMenang(data *Team, jumlah int) {
+	var j, idx_Max int
+	var temp team
+	for i = 0; i < jumlah-1; i++ {
+		idx_Max = i
+		for j = i + 1; j < jumlah; j++ {
+			if data[j].menang > data[idx_Max].menang {
+				idx_Max = j
+			}
+		}
+		temp = data[i]
+		data[i] = data[idx_Max]
+		data[idx_Max] = temp
+	}
+}
+
+func InsertionSortBerdasarkanSkor(data *Team, jumlah int) {
+	var j int
+	var temp team
+	for i = 1; i < jumlah; i++ {
+		temp = data[i]
+		j = i - 1
+		for j >= 0 && data[j].selisihSkor < temp.selisihSkor {
+			data[j+1] = data[j]
+			j--
+		}
+		data[j+1] = temp
+	}
+}
+
+func MenampilkanData(data *Team, jumlah int) {
 	fmt.Println("\nKlasemen:")
-	fmt.Printf("%-3s %-20s %-10s %-15s %-20s\n", "No", "Nama Tim", "Menang", "Selisih Skor", "Best Player")
+	fmt.Printf("%-3s %-20s %-10s %-15s %-20s\n", "No", "Nama data", "Menang", "Selisih Skor", "Best Player")
 	fmt.Println("-------------------------------------------------------------------------------")
-	for i := 0; i < jumlaht; i++ {
+	for i := 0; i < jumlah; i++ {
 		fmt.Printf("%-3d %-20s %-10d %-15d %-20s\n",
-			i+1, tim[i].namatim, tim[i].menang, tim[i].selisihsk, tim[i].bestplayer)
+			i+1, data[i].namatim, data[i].menang, data[i].selisihSkor, data[i].bestplayer)
 	}
 }
