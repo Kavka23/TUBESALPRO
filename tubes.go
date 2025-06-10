@@ -113,15 +113,19 @@ func UpdateTeam(data *Team, jumlah int, nama string, menang int, skor int, playe
 }
 
 func DeleteTeam(data *Team, jumlah *int, nama string) {
-	var j int
+	var found bool
+
 	for i = 0; i < *jumlah; i++ {
-		if data[i].namatim == nama {
-			for j = i; j < *jumlah-1; j++ {
-				data[j] = data[j+1]
-			}
-			*jumlah--
-			break
+		if !found && data[i].namatim == nama {
+			found = true
 		}
+		if found && i < *jumlah-1 {
+			data[i] = data[i+1]
+		}
+	}
+
+	if found {
+		*jumlah = *jumlah - 1
 	}
 }
 
